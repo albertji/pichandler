@@ -1,0 +1,40 @@
+.mainpage{
+  position: absolute;
+  top: 60px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  /*border: 1px solid #000;*/
+  overflow: hidden;
+  padding: 20px;
+}
+.canvascon{
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+}
+.canvas{
+  /*background: cornflowerblue;*/
+}
+.curvepanel{
+  width:250px;
+  height:250px;
+  position: fixed;
+  z-index: 999;
+  background: #fff;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: move;
+  border: 2px solid rgb(67, 110, 238);
+  box-shadow: rgb(67, 110, 238) 0px 0px 10px 1px;
+}
+#curve{
+  background: #ccc;
+  cursor: default;
+  width: 100%;
+  height: 100%;
+}
+.curvecanvas{
+  width: 100%;
+  height: 100%;
+}

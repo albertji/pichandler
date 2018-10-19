@@ -1,0 +1,28 @@
+.menubar{
+  height: 60px;
+  background: #071a32;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  color: #fff;
+  line-height: 60px;
+  font-size: 18px;
+  z-index: 500;
+}
+.menuleft{
+  width: 180px;
+  height: 60px;
+  display: inline-block;
+  background: #008cd6;
+  color: #fff;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  text-align: center;
+  font-size: 18px;
+}
+.attrname{
+  text-align: center;
+  vertical-align: middle;
+}
