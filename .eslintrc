@@ -37,6 +37,8 @@
     "no-param-reassign": 0,
     "no-lonely-if": 0,
     "no-shadow": 0,
+    "no-await-in-loop": 0,
+    "eqeqeq": 0,
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "comma-dangle": ["error", "only-multiline"],
     "import/extensions": ["off", "never"],
