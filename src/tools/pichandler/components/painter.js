@@ -1,10 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import '../assets/css/main.css'
-import {
-  updateCanvasSize,
-  updatePosition
-} from '../../../redux/actions/action_pichandler'
+import { updateCanvasSize } from '../../../redux/actions/action_pichandler'
 import imgUrl from '../assets/img/bg.jpg'
 
 class Painter extends Component {
@@ -13,7 +10,6 @@ class Painter extends Component {
     this.state = null
     this.picCanvas = null
     this.picCtx = null
-    this.colorList = []
     this.img = null
 
     this.canvasLeft = 0
@@ -22,12 +18,12 @@ class Painter extends Component {
 
   componentDidMount() {
     window.addEventListener('resize', this.onWindowResize)
+    if (this.props.onRef) this.props.onRef(this)
     const canvasWidth = document.getElementById('canvascon').offsetWidth
     const canvasHeight = document.getElementById('canvascon').offsetHeight
     this.canvasLeft = document.getElementById('mainpage').offsetLeft + 20
     this.canvasTop = document.getElementById('mainpage').offsetTop + 20
     this.props.updateCanvasSize(canvasWidth, canvasHeight)
-    this.initColorList()
     this.initImg()
   }
 
@@ -35,21 +31,8 @@ class Painter extends Component {
     window.removeEventListener('resize', this.onWindowResize)
   }
 
-  onMousedown = () => {}
-
-  onMousemove = async event => {
-    const eventLeft = event.clientX
-    const eventTop = event.clientY
-    const offsetX = eventLeft - this.canvasLeft
-    const offsetY = eventTop - this.canvasTop
-    await this.props.updatePosition(offsetX, offsetY)
+  onMousemove = () => {
     this.resetData()
-  }
-
-  initColorList = () => {
-    for (let i = 0; i <= 255; i++) {
-      this.colorList.push([i, i])
-    }
   }
 
   initImg = () => {
@@ -74,7 +57,6 @@ class Painter extends Component {
 
   resetData = () => {
     this.drawBackground()
-    this.drawBoxes()
   }
 
   drawBackground = () => {
@@ -92,33 +74,11 @@ class Painter extends Component {
       const b = pixeldata[4 * i + 2]
       // const a = pixeldata[4 * i + 3]
 
-      pixeldata[4 * i + 0] = parseInt(this.colorList[r][1], 10)
-      pixeldata[4 * i + 1] = parseInt(this.colorList[g][1], 10)
-      pixeldata[4 * i + 2] = parseInt(this.colorList[b][1], 10)
+      pixeldata[4 * i + 0] = parseInt(this.props.colorList[r][1], 10)
+      pixeldata[4 * i + 1] = parseInt(this.props.colorList[g][1], 10)
+      pixeldata[4 * i + 2] = parseInt(this.props.colorList[b][1], 10)
     }
     this.picCtx.putImageData(pixels, 0, 0)
-  }
-
-  drawBoxes = () => {
-    const { boxes } = this.props.canvasData
-    boxes.map(box => {
-      this.drawSingleBox(box)
-      return false
-    })
-  }
-
-  drawSingleBox = box => {
-    const { rect } = box
-    const width = rect[2] - rect[0]
-    const height = rect[3] - rect[1]
-    this.picCtx.beginPath()
-    // console.log(this.picCtx)
-    this.picCtx.lineWidth = 1
-    this.picCtx.fillStyle = '#fff'
-    this.picCtx.strokeStyle = '#ff0000'
-    this.picCtx.rect(rect[0], rect[1], width, height)
-    this.picCtx.stroke()
-    // this.picCtx.fill()
   }
 
   render() {
@@ -137,14 +97,11 @@ class Painter extends Component {
 }
 const mapStatetoProps = state => ({
   canvasSize: state.pichandler.canvasSize,
-  canvasData: state.pichandler.canvasData
+  colorList: state.curveCanvas.list
 })
 const mapDispatchToProps = dispatch => ({
   updateCanvasSize: (width, height) => {
     dispatch(updateCanvasSize(width, height))
-  },
-  updatePosition: (x, y) => {
-    dispatch(updatePosition(x, y))
   }
 })
 export default connect(

@@ -18,8 +18,8 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        // use: ['babel-loader?cacheDirectory=true', 'eslint-loader'],
-        use: ['babel-loader?cacheDirectory=true'],
+        use: ['babel-loader?cacheDirectory=true', 'eslint-loader'],
+        // use: ['babel-loader?cacheDirectory=true'],
         exclude: /plugins/,
         include: path.join(__dirname, 'src')
       },

@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import '../assets/css/main.css'
-import { xyChangecan } from '../../../utils/util'
+import { xyChangecan, xyChangedat } from '../../../utils/util'
 import {
   setCurrentPoint,
   setMatchFlag,
   setIsBase,
   updatePoints,
   updateList,
-  setDragFlag
+  setDragFlag,
+  updatePointByIndex
 } from '../../../redux/actions/action_curvecanvas'
 import numbers from '../../../plugins/numbers'
 
@@ -36,12 +37,13 @@ class Curve extends Component {
     this.resetdata()
   }
 
-  resetdata = () => {
+  resetdata = async () => {
     this.curveCtx.clearRect(0, 0, this.cHeight, this.cWidth)
+    this.props.reDrawPainter()
     this.drawReferLine()
-    this.drawPoints()
+    await this.drawPoints()
     this.drawLines()
-    this.drawBasePoints()
+    await this.drawBasePoints()
   }
 
   drawReferLine = () => {
@@ -86,7 +88,7 @@ class Curve extends Component {
   drawCircle = async (arr, index, baseFlag) => {
     const transArr = [arr[0], this.cHeight - arr[1]]
     this.curveCtx.beginPath()
-    this.curveCtx.strokeStyle = 'rgba(255,255,255,1)'
+    this.curveCtx.strokeStyle = 'rgba(255,255,255,0)'
     this.curveCtx.arc(transArr[0], transArr[1], 5, 0, 2 * Math.PI)
     this.curveCtx.stroke()
     await this.isPointInStroke(index, baseFlag)
@@ -147,6 +149,7 @@ class Curve extends Component {
       }
     } else {
       if (this.curveCtx.isPointInPath(this.hover.x, this.hover.y)) {
+        // 使更新成所选基准点
         await this.props.setCurrentPoint(index)
       }
     }
@@ -154,7 +157,7 @@ class Curve extends Component {
 
   addBasePoint = async point => {
     const pt = [parseInt(point[0], 10), parseInt(point[1], 10)]
-    let tmpPoints = JSON.parse(JSON.stringify(this.props.points))
+    const tmpPoints = JSON.parse(JSON.stringify(this.props.points))
     tmpPoints.push(pt)
     for (let j = 0; j < tmpPoints.length - 1; j++) {
       // 两两比较，如果前一个比后一个大，则交换位置。
@@ -166,8 +169,6 @@ class Curve extends Component {
         }
       }
     }
-    console.log(tmpPoints)
-    tmpPoints = [[0, 0], [50, 230], [255, 255]]
     await this.props.updatePoints(tmpPoints)
     await this.props.updateList(this.getList(tmpPoints))
     this.resetdata()
@@ -268,57 +269,62 @@ class Curve extends Component {
     return list
   }
 
-  handleMouseMove = event => {
+  handleMouseMove = async event => {
     this.hover = {
       x: event.nativeEvent.offsetX,
       y: event.nativeEvent.offsetY
     }
-    /*    if(drag_flag){
-      if(current_point ==0 || current_point==points.length-1) return
-      //console.log("dragging")
-      //console.log(current_point)
-      var canarr = [hover.x,hover.y]
-      var dataarr = xyChangedat(canarr)
-      var trans_data = [parseInt(dataarr[0]),parseInt(c_height-dataarr[1])]
+    if (this.props.dragFlag) {
+      if (
+        this.props.currentPoint == 0 ||
+        this.props.currentPoint == this.props.points.length - 1
+      )
+        return
 
-      var next_point = points[current_point+1][0]
-      var pre_point = points[current_point-1][0]
-      if(trans_data[0] < next_point && trans_data[0] > pre_point){
-        points[current_point] = trans_data
+      const canarr = [this.hover.x, this.hover.y]
+      const dataarr = xyChangedat(
+        canarr,
+        { width: this.cWidth, height: this.cHeight },
+        { width: 255, height: 255 }
+      )
+      const transData = [
+        parseInt(dataarr[0], 10),
+        parseInt(255 - dataarr[1], 10)
+      ]
+
+      const nextPoint = this.props.points[this.props.currentPoint + 1][0]
+      const prePoint = this.props.points[this.props.currentPoint - 1][0]
+      if (transData[0] < nextPoint && transData[0] > prePoint) {
+        await this.props.updatePointByIndex(this.props.currentPoint, transData) // albert
+      } else {
+        // this.props.points.splice(this.props.currentPoint, 1)
       }
-      else{
-        points.splice(current_point,1)
-      }
-      list = getList(points)
-    } */
+      await this.props.updateList(this.getList(this.props.points))
+    }
     this.resetdata()
   }
 
   handleMouseDown = async () => {
-    console.log(this.props.currentPoint)
     if (this.props.currentPoint !== false) {
       // 如果不为false说明在感应点或基准点上
       await this.props.setDragFlag(true)
       if (!this.props.isbase) {
-        // 非基准点
-        let findFlag = false
-        for (let i = 0; i < this.props.points.length; i++) {
-          // 遍历基准点如果没有则需要添加这个点作为基准点
-          if (this.props.points[i][0] === this.props.currentPoint) {
-            findFlag = true
-            break
-          }
-        }
-        if (!findFlag) {
-          this.addBasePoint(this.props.list[this.props.currentPoint])
-        }
+        this.addBasePoint(this.props.list[this.props.currentPoint])
       }
     }
   }
 
+  handleWrapperMouseDown = event => {
+    event.stopPropagation()
+  }
+
   render() {
     return (
-      <div id="curve" className="curve">
+      <div
+        id="curve"
+        className="curve"
+        onMouseDown={this.handleWrapperMouseDown}
+      >
         <canvas
           id="curvecanvas"
           className="curvecanvas"
@@ -346,7 +352,9 @@ const mapDispatchToProps = dispatch => ({
   setIsBase: baseFlag => dispatch(setIsBase(baseFlag)),
   updatePoints: points => dispatch(updatePoints(points)),
   updateList: list => dispatch(updateList(list)),
-  setDragFlag: flag => dispatch(setDragFlag(flag))
+  setDragFlag: flag => dispatch(setDragFlag(flag)),
+  updatePointByIndex: (index, point) =>
+    dispatch(updatePointByIndex(index, point))
 })
 export default connect(
   mapStatetoProps,

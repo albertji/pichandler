@@ -4,6 +4,7 @@ export const SET_ISBASE = 'SET_ISBASE'
 export const UPDATE_POINTS = 'UPDATE_POINTS'
 export const UPDATE_LIST = 'UPDATE_LIST'
 export const SET_DRAG_FLAG = 'SET_DRAG_FLAG'
+export const UPDATE_POINT_BY_INDEX = 'UPDATE_POINT_BY_INDEX'
 
 function actionSetCurrentPoint(index) {
   return {
@@ -62,6 +63,22 @@ export function updatePoints(points) {
   return function(dispatch) {
     return new Promise(resolve => {
       dispatch(actionUpdatePoints(points))
+      resolve()
+    })
+  }
+}
+
+function actionUpdatePointByIndex(index, point) {
+  return {
+    type: UPDATE_POINT_BY_INDEX,
+    index,
+    point
+  }
+}
+export function updatePointByIndex(index, point) {
+  return function(dispatch) {
+    return new Promise(resolve => {
+      dispatch(actionUpdatePointByIndex(index, point))
       resolve()
     })
   }

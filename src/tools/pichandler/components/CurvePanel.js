@@ -34,7 +34,7 @@ class CurvePanel extends Component {
         onMouseMove={this.handleMouseMove}
         style={{ left: `${panelLeft}px`, top: `${panelTop}px` }}
       >
-        <Curve />
+        <Curve reDrawPainter={this.props.reDrawPainter} />
       </div>
     )
   }

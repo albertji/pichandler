@@ -3,6 +3,7 @@ import {
   SET_MATCH_FLAG,
   SET_ISBASE,
   UPDATE_POINTS,
+  UPDATE_POINT_BY_INDEX,
   UPDATE_LIST,
   SET_DRAG_FLAG
 } from '../actions/action_curvecanvas'
@@ -46,6 +47,14 @@ export default function reducer(state = initState, action) {
         ...state,
         points: action.points
       }
+    case UPDATE_POINT_BY_INDEX: {
+      const points = JSON.parse(JSON.stringify(state.points))
+      points[action.index] = action.point
+      return {
+        ...state,
+        points
+      }
+    }
     case UPDATE_LIST:
       return {
         ...state,

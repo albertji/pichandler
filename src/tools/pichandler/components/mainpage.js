@@ -7,17 +7,22 @@ import {
   unselectCurvePanel,
   updateCurvePanelPosition
 } from '../../../redux/actions/action_curvepanel'
+import { setDragFlag } from '../../../redux/actions/action_curvecanvas'
 
 class MainPage extends Component {
   constructor(props) {
     super(props)
     this.state = null
     this.curvePanel = null
+    this.painter = null
   }
 
   handleMouseUp = () => {
     if (this.props.selected) {
       this.props.unselectCurvePanel()
+    }
+    if (this.props.dragFlag) {
+      this.props.setDragFlag(false)
     }
   }
 
@@ -31,6 +36,10 @@ class MainPage extends Component {
     }
   }
 
+  reDrawPainter = () => {
+    this.painter.drawBackground()
+  }
+
   render() {
     return (
       <div
@@ -39,11 +48,16 @@ class MainPage extends Component {
         onMouseUp={this.handleMouseUp}
         onMouseMove={this.handleMouseMove}
       >
-        <Painter />
+        <Painter
+          onRef={painter => {
+            this.painter = painter
+          }}
+        />
         <CurvePanel
           onRef={curvePanel => {
             this.curvePanel = curvePanel
           }}
+          reDrawPainter={this.reDrawPainter}
         />
       </div>
     )
@@ -54,7 +68,8 @@ const mapStatetoProps = state => ({
   selected: state.curvePanel.selected,
   selectedPosition: state.curvePanel.selectedPosition,
   startPosition: state.curvePanel.startPosition,
-  position: state.curvePanel.position
+  position: state.curvePanel.position,
+  dragFlag: state.curveCanvas.dragFlag
 })
 const mapDispatchToProps = dispatch => ({
   unselectCurvePanel: () => {
@@ -62,7 +77,8 @@ const mapDispatchToProps = dispatch => ({
   },
   updateCurvePanelPosition: (left, top) => {
     dispatch(updateCurvePanelPosition(left, top))
-  }
+  },
+  setDragFlag: flag => dispatch(setDragFlag(flag))
 })
 export default connect(
   mapStatetoProps,
